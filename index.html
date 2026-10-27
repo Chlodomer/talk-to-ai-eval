@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>איך מדברים עם בינה מלאכותית · משימת הערכה</title>
+<meta name="description" content="משימת הערכה: בונים פרומפט מתוך מסמכים">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M32 6C17 6 6 16 6 29c0 7 3 13 9 17l-3 11 12-7c3 1 5 1 8 1 15 0 26-10 26-22S47 6 32 6z' fill='%23E17451'/%3E%3Cpath d='M32 29m-3 0a3 3 0 1 1 6 0a7 7 0 1 1 -14 0a11 11 0 1 1 22 0' fill='none' stroke='%23FEFBF3' stroke-width='3.5' stroke-linecap='round'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <svg class="bubble" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 6C17 6 6 16 6 29c0 7 3 13 9 17l-3 11 12-7c3 1 5 1 8 1 15 0 26-10 26-22S47 6 32 6z" fill="#E17451"/>
+      <path d="M32 29m-3 0a3 3 0 1 1 6 0a7 7 0 1 1 -14 0a11 11 0 1 1 22 0" fill="none" stroke="#FEFBF3" stroke-width="3.5" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <h1 id="appTitle"></h1>
+      <p id="appSub"></p>
+    </div>
+  </div>
+  <nav class="steps" id="steps" aria-label="שלבי המשימה">
+    <button data-step="1"><span>1</span>בונים פרומפט</button>
+    <button data-step="2"><span>2</span>איך נראית הצלחה</button>
+    <button data-step="3"><span>3</span>סיכום</button>
+    <button data-step="4"><span>4</span>הגשה</button>
+  </nav>
+  <button class="ghost" id="openBrief">התדריך</button>
+</header>
+
+<div class="mobile-switch" id="mobileSwitch">
+  <button data-pane="case" class="on">תיק העבודה</button>
+  <button data-pane="desk">שולחן העבודה</button>
+</div>
+
+<main class="layout" id="layout">
+  <!-- תיק העבודה -->
+  <aside class="case" id="case">
+    <div class="case-head">
+      <h2>תיק העבודה</h2>
+      <p>סמנו טקסט במסמך וגררו אותו לפרומפט</p>
+    </div>
+    <div class="doc-tabs" id="docTabs" role="tablist"></div>
+    <div class="reader" id="reader"></div>
+  </aside>
+
+  <!-- שולחן העבודה -->
+  <section class="desk" id="desk">
+
+    <div class="panel" data-panel="1">
+      <div class="panel-head">
+        <div>
+          <h2>הפרומפט שלי</h2>
+          <p class="hint">גררו לכאן קטעים מהמסמכים ואבני בניין מהמאגר, וכתבו משפטים משלכם שמחברים ביניהם. לכל רכיב בחרו תפקיד. אפשר לגרור רכיבים כדי לשנות את הסדר.</p>
+        </div>
+        <div class="counter" id="wordCount">0 מילים</div>
+      </div>
+      <div class="composer" id="composer" aria-label="הפרומפט"></div>
+      <div class="composer-actions">
+        <button class="btn" id="addOwn">＋ משפט משלכם</button>
+      </div>
+
+      <div class="bank">
+        <div class="bank-head">
+          <h3>מאגר אבני בניין</h3>
+          <p class="hint">לא כל אבן כאן שווה שימוש. בחרו רק את מה שבאמת משפר את הפרומפט.</p>
+        </div>
+        <div class="bank-grid" id="bank"></div>
+      </div>
+    </div>
+
+    <div class="panel" data-panel="2" hidden>
+      <div class="panel-head">
+        <div>
+          <h2>איך נראית הצלחה?</h2>
+          <p class="hint">לפני ששואלים, מחליטים מה ייחשב לתוצאה טובה. כתבו קריטריונים שאפשר לבדוק, הסבירו למה כל אחד מהם חשוב, ותארו איך תבדקו אותו בטיוטה. אם אי אפשר לבדוק קריטריון, הוא עוד לא מפורט מספיק.</p>
+        </div>
+      </div>
+      <div id="criteria" class="criteria"></div>
+      <button class="btn" id="addCrit">＋ קריטריון נוסף</button>
+    </div>
+
+    <div class="panel" data-panel="3" hidden>
+      <div class="panel-head">
+        <div>
+          <h2>סיכום</h2>
+          <p class="hint">ענו בקצרה ובמילים שלכם.</p>
+        </div>
+      </div>
+      <div id="reflections" class="reflections"></div>
+    </div>
+
+    <div class="panel" data-panel="4" hidden>
+      <div class="panel-head">
+        <div>
+          <h2>הגשה</h2>
+          <p class="hint">מלאו את הפרטים, עברו על הקובץ והורידו אותו. את קובץ ה־TXT מעלים למערכת הקורס.</p>
+        </div>
+      </div>
+      <div class="ident">
+        <label>שם מלא<input id="sName" autocomplete="name"></label>
+        <label>מספר סטודנט<input id="sId" inputmode="numeric"></label>
+      </div>
+      <ul class="checklist" id="checklist"></ul>
+      <div class="preview-wrap">
+        <div class="preview-head">
+          <h3>הקובץ שיוגש</h3>
+          <button class="btn primary" id="download">הורדת קובץ TXT</button>
+        </div>
+        <pre class="preview" id="preview"></pre>
+      </div>
+      <div class="danger-zone">
+        <button class="link" id="resetAll">מחיקת כל העבודה והתחלה מחדש</button>
+      </div>
+    </div>
+
+  </section>
+</main>
+
+<!-- כפתור צף ליד טקסט מסומן -->
+<button class="sel-pill" id="selPill" draggable="true" hidden>＋ הוסיפו לפרומפט</button>
+
+<!-- תדריך -->
+<div class="modal" id="brief" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="briefH">
+    <svg class="bubble big" viewBox="0 0 64 64" aria-hidden="true">
+      <path d="M32 6C17 6 6 16 6 29c0 7 3 13 9 17l-3 11 12-7c3 1 5 1 8 1 15 0 26-10 26-22S47 6 32 6z" fill="#E17451"/>
+      <path d="M32 29m-3 0a3 3 0 1 1 6 0a7 7 0 1 1 -14 0a11 11 0 1 1 22 0" fill="none" stroke="#FEFBF3" stroke-width="3.5" stroke-linecap="round"/>
+    </svg>
+    <h2 id="briefH"></h2>
+    <p class="lead" id="briefLead"></p>
+    <p class="twist" id="briefTwist"></p>
+    <ol id="briefSteps"></ol>
+    <p class="note" id="briefNote"></p>
+    <div class="row">
+      <button class="btn primary" id="closeBrief">מתחילים</button>
+      <button class="btn" id="briefTour">סיור קצר במסך</button>
+    </div>
+  </div>
+</div>
+
+<!-- אישור מחיקה -->
+<div class="modal" id="confirm" hidden>
+  <div class="modal-card small" role="dialog" aria-modal="true">
+    <h2>למחוק הכול?</h2>
+    <p>כל מה שבניתם יימחק מהדפדפן הזה. אי אפשר לבטל את הפעולה.</p>
+    <div class="row">
+      <button class="btn danger" id="confirmYes">כן, למחוק</button>
+      <button class="btn" id="confirmNo">ביטול</button>
+    </div>
+  </div>
+</div>
+
+<!-- סיור במסך -->
+<div class="tour" id="tour" hidden>
+  <div class="tour-hole" id="tourHole"></div>
+  <div class="tour-card" id="tourCard" role="dialog" aria-live="polite">
+    <div class="tour-n" id="tourN"></div>
+    <h3 id="tourH"></h3>
+    <p id="tourP"></p>
+    <div class="row">
+      <button class="btn primary" id="tourNext">הבא</button>
+      <button class="btn" id="tourPrev">הקודם</button>
+      <button class="link" id="tourSkip">דלגו על הסיור</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
